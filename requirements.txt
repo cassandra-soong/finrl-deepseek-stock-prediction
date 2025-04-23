@@ -1,0 +1,6 @@
+requests
+feedparser
+pandas
+beautifulsoup4
+newsapi-python
+praw
