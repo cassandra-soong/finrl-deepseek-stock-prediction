@@ -24,16 +24,11 @@ LAST_RUN_SENTIMENT_FILE="$TIMESTAMP_DIR/.last_run_sentiment"
 LAST_RUN_FINRL_FILE="$TIMESTAMP_DIR/.last_run_finrl"
 
 # --- Logging Function ---
-# This function appends to LOG_FILE.
-# If LOG_FILE is properly .gitignored and untracked by 'git rm --cached',
-# git operations should ignore its changes.
 log_message() {
   echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
 }
 
 # --- Initial Setup ---
-# Clear previous log file content if desired, or let it append
-# echo "--- New Pipeline Run Starting $(date '+%Y-%m-%d %H:%M:%S') ---" > "$LOG_FILE"
 log_message "--- Starting Pipeline Execution ---"
 log_message "Project Directory (BASE_DIR): $BASE_DIR"
 log_message "Git Branch: $GIT_BRANCH"
@@ -61,7 +56,7 @@ log_message "API keys loaded and exported."
 if [ -z "$NEWSAPI_KEY" ]; then # Make sure NEWSAPI_KEY is defined in your API_Keys.txt
     log_message "ERROR: NEWSAPI_KEY was not found after loading '$API_KEYS_FILE'. Exiting."
     echo "Error: NEWSAPI_KEY was not found after loading '$API_KEYS_FILE'." >&2
-    exit 1
+    exit 1 # It's critical for the scraper
 fi
 
 # --- Function to check if a stage should run ---
@@ -99,23 +94,19 @@ should_run_stage() {
 }
 
 # --- Function to Add, Commit, and Push changes to Git ---
-# This function should NOT attempt to commit pipeline_run.log if it's correctly .gitignored.
-# 'git add -A' will stage all changes to *tracked* files and new *untracked-but-not-ignored* files.
-# It should ignore pipeline_run.log.
 git_commit_and_push() {
     local stage_name_for_commit="$1"
     local commit_msg_prefix="$2" 
 
     log_message "Attempting Git operations for stage: $stage_name_for_commit"
     echo "--- Attempting Git operations for stage: $stage_name_for_commit ---" # VERBOSE
-    ( # Use subshell for git operations to isolate potential errors and ensure cd back
-        set -e # Exit subshell on error
+    ( 
+        set -e 
         cd "$BASE_DIR" 
 
         log_message "Adding all relevant changes to Git staging area..."
         echo "Git: Adding all relevant changes to staging area (git add -A)..." # VERBOSE
-        git add -A # This stages new and modified files that are TRACKED or NOT IGNORED.
-                   # pipeline_run.log should be ignored by this.
+        git add -A 
         
         if git diff --staged --quiet; then
             log_message "No changes staged for commit after $stage_name_for_commit."
@@ -136,45 +127,44 @@ git_commit_and_push() {
         echo "--- Git operations for $stage_name_for_commit finished. ---" # VERBOSE
     ) || {
         log_message "ERROR: Git operations (add/commit/push) failed for stage: $stage_name_for_commit."
-        echo "ERROR: Git operations (add/commit/push) failed for stage: $stage_name_for_commit. Check $LOG_FILE for details." >&2 # VERBOSE
-        return 1 # Indicate failure
+        echo "ERROR: Git operations (add/commit/push) failed for stage: $stage_name_for_commit. Check $LOG_FILE for details." >&2 
+        return 1 
     }
-    return 0 # Indicate success
+    return 0 
 }
-
 
 # --- Create/Activate Conda Environment ---
 log_message ">>> Setting up/Activating Conda environment '$CONDA_ENV_NAME'..."
-echo "--- Setting up/Activating Conda environment '$CONDA_ENV_NAME' ---" # VERBOSE
+echo "--- Setting up/Activating Conda environment '$CONDA_ENV_NAME' ---" 
 if ! conda env list | grep -q "^$CONDA_ENV_NAME\s"; then
     log_message "Creating new Conda environment '$CONDA_ENV_NAME' with Python $PYTHON_VERSION..."
-    echo "Creating new Conda environment '$CONDA_ENV_NAME' with Python $PYTHON_VERSION..." # VERBOSE
+    echo "Creating new Conda environment '$CONDA_ENV_NAME' with Python $PYTHON_VERSION..." 
     conda create -n "$CONDA_ENV_NAME" python="$PYTHON_VERSION" -y
     log_message ">>> Installing dependencies..."
-    echo "Conda env created. Installing dependencies..." # VERBOSE
+    echo "Conda env created. Installing dependencies..." 
     eval "$(conda shell.bash hook)"
     conda activate "$CONDA_ENV_NAME"
     pip install --upgrade pip
     log_message "Installing requirements for scrape..."
-    echo "Installing requirements from scrape/requirements.txt..." # VERBOSE
+    echo "Installing requirements from scrape/requirements.txt..." 
     pip install -r "$BASE_DIR/scrape/requirements.txt"
     log_message "Installing requirements for sentiment..."
-    echo "Installing requirements from sentiment/requirements.txt..." # VERBOSE
+    echo "Installing requirements from sentiment/requirements.txt..." 
     pip install -r "$BASE_DIR/sentiment/requirements.txt"
     log_message "Installing requirements for finrl..."
-    echo "Installing requirements from finrl/requirements.txt..." # VERBOSE
+    echo "Installing requirements from finrl/requirements.txt..." 
     pip install -r "$BASE_DIR/finrl/requirements.txt"
     conda deactivate
     log_message "Dependencies installed. Conda environment '$CONDA_ENV_NAME' created and populated."
-    echo "All dependencies installed. Conda environment '$CONDA_ENV_NAME' populated." # VERBOSE
+    echo "All dependencies installed. Conda environment '$CONDA_ENV_NAME' populated." 
 else
     log_message "Conda environment '$CONDA_ENV_NAME' already exists."
-    echo "Conda environment '$CONDA_ENV_NAME' already exists." # VERBOSE
+    echo "Conda environment '$CONDA_ENV_NAME' already exists." 
 fi
 
 log_message "Activating Conda environment '$CONDA_ENV_NAME' for script execution..."
-echo "Activating Conda environment '$CONDA_ENV_NAME' for script execution..." # VERBOSE
-eval "$(conda shell.bash hook)" # Source conda shell functions
+echo "Activating Conda environment '$CONDA_ENV_NAME' for script execution..." 
+eval "$(conda shell.bash hook)" 
 conda activate "$CONDA_ENV_NAME"
 if [ "$CONDA_DEFAULT_ENV" != "$CONDA_ENV_NAME" ]; then
     log_message "ERROR: Failed to activate Conda environment '$CONDA_ENV_NAME'. Exiting."
@@ -182,68 +172,66 @@ if [ "$CONDA_DEFAULT_ENV" != "$CONDA_ENV_NAME" ]; then
     exit 1
 fi
 log_message "Conda environment '$CONDA_ENV_NAME' activated."
-echo "Conda environment '$CONDA_ENV_NAME' activated." # VERBOSE
+echo "Conda environment '$CONDA_ENV_NAME' activated." 
 
 # --- Git Pull ---
-# If pipeline_run.log is properly untracked AND in .gitignore,
-# git stash and git pull should not be affected by its changes.
-# The log_message calls here will append to the existing LOG_FILE.
 log_message "Attempting Git pull from origin '$GIT_BRANCH'..."
-echo "--- Attempting Git pull from origin '$GIT_BRANCH' ---" # VERBOSE
+echo "--- Attempting Git pull from origin '$GIT_BRANCH' ---"
 
-GIT_PULL_SUCCESS=true
-( # Use subshell for git operations
-    set -e # Exit subshell on error
-    cd "$BASE_DIR" 
+GIT_PULL_SEQUENCE_FAILED=false
+(
+    set -e 
+    cd "$BASE_DIR"
 
-    log_message "Stashing local changes (if any)..."
-    echo "Git: Stashing local changes (if any)..." # VERBOSE
-    # --include-untracked will stash new untracked files NOT in .gitignore.
-    # If pipeline_run.log is correctly .gitignored and untracked, it should be ignored by this.
-    # If there's still an issue, consider removing --include-untracked if you don't expect
-    # other legitimately new untracked files that need stashing.
-    git stash push --keep-index --include-untracked -m "Auto-stash before pull by pipeline_run.sh"
-    
+    log_message "Stashing local changes to TRACKED files (if any)..."
+    echo "Git: Stashing local changes to TRACKED files (using git stash push --keep-index)..."
+    # MODIFIED: Removed --include-untracked.
+    # This will only stash changes to tracked files (staged or unstaged).
+    # Ignored files like pipeline_run.log will be left alone by stash.
+    # If no tracked files changed, "No local changes to save" is expected.
+    git stash push --keep-index -m "Auto-stash (tracked files) before pull by pipeline_run.sh"
+
     log_message "Pulling from origin '$GIT_BRANCH' with rebase..."
-    echo "Git: Pulling from origin '$GIT_BRANCH' with rebase..." # VERBOSE
+    echo "Git: Pulling from origin '$GIT_BRANCH' with rebase..."
     git pull origin "$GIT_BRANCH" --rebase
-    
-    log_message "Attempting to pop stashed changes..."
-    echo "Git: Attempting to pop stashed changes..." # VERBOSE
+
+    log_message "Attempting to pop stashed changes (if any)..."
+    echo "Git: Attempting to pop stashed changes (if any)..."
+    # Try to pop. If no stash was created, this will state "No stash found." and not be an error.
+    # If a real conflict occurs during pop, `set -e` will cause the subshell to exit.
     if ! git stash pop; then
-        log_message "INFO: No stash to pop, or stash pop resulted in conflicts. Manual resolution may be needed. Check git status."
-        echo "Git INFO: No stash to pop, or stash pop resulted in conflicts. Manual resolution may be needed. Check git status." # VERBOSE
-        # Do not set GIT_PULL_SUCCESS to false here, as the pull might have succeeded.
-        # The stash pop is a separate issue. The script will continue.
+        # This block might be reached if 'git stash pop' itself has an issue but doesn't exit with error (e.g. "No stash found" prints to stderr but exits 0)
+        # or if set -e is not catching a specific type of pop failure.
+        # A more robust check for "No stash found" could be added if necessary.
+        # For now, any message from `git stash pop` indicating failure (other than "No stash found") is a concern.
+        log_message "INFO: Stash pop command executed. It might have failed due to a conflict or reported 'No stash found'. Manual check of 'git status' may be needed if issues arise."
+        echo "Git INFO: Stash pop command executed. Check 'git status' if unexpected behavior occurs."
     else
-        log_message "Stash popped successfully."
-        echo "Git: Stash popped successfully." # VERBOSE
+        log_message "Stash popped successfully." # Or no stash was present.
+        echo "Git: Stash popped successfully (or no stash was present)."
     fi
     log_message "Git pull and stash pop sequence completed in subshell."
 ) || {
-    log_message "ERROR: Git operations (stash/pull/pop) failed. Check git status. Continuing with current local state."
-    echo "ERROR: Git operations (stash/pull/pop) failed. Check $LOG_FILE and git status. Continuing with current local state." >&2 # VERBOSE
-    GIT_PULL_SUCCESS=false # Indicate that the sequence had an error
+    log_message "ERROR: Git operations (stash/pull/pop) sequence FAILED in subshell. Check git status. Continuing with current local state."
+    echo "ERROR: Git operations (stash/pull/pop) sequence FAILED in subshell. Check $LOG_FILE and git status. Continuing with current local state." >&2
+    GIT_PULL_SEQUENCE_FAILED=true
 }
 
-if [ "$GIT_PULL_SUCCESS" = true ]; then
-    log_message "Git pull and stash pop sequence finished successfully."
-    echo "--- Git pull and stash pop sequence finished successfully. ---" # VERBOSE
+if [ "$GIT_PULL_SEQUENCE_FAILED" = true ]; then
+    log_message "Git pull sequence encountered an error. The script will continue, but please check repository state and logs."
+    echo "--- Git pull sequence encountered an error. Check logs and git status. ---"
 else
-    log_message "Git pull and stash pop sequence encountered an error. Check logs and git status."
-    echo "--- Git pull and stash pop sequence encountered an error. Check logs and git status. ---" # VERBOSE
-    # Decide if you want to exit or continue if git operations fail
-    # exit 1; 
+    log_message "Git pull sequence finished." # This implies success or non-critical pop issue like 'no stash'.
+    echo "--- Git pull sequence finished. ---"
 fi
 
-
 # --- Execute Stages Based on Interval Checks ---
-# The log_message calls in this section will append to LOG_FILE as normal.
+# (The rest of the script for Scraper, Sentiment, FinRL, and Deactivate Conda Env remains the same as your provided version)
 
 # (1) Scraper
 if should_run_stage "Scraper" "$SCRAPE_INTERVAL_MINUTES" "$LAST_RUN_SCRAPE_FILE"; then
     log_message ">>> (1/3) Running news scraping script..."
-    echo ">>> (1/3) Starting News Scraping script (scrape/scrape_script.py)..." # MODIFIED
+    echo ">>> (1/3) Starting News Scraping script (scrape/scrape_script.py)..."
     cd "$BASE_DIR/scrape" || { log_message "ERROR: Failed to cd to $BASE_DIR/scrape. Skipping scraper."; echo "ERROR: Failed to cd to $BASE_DIR/scrape. Skipping scraper." >&2; }
     python scrape_script.py
     exit_code=$?
@@ -264,7 +252,7 @@ fi
 # (2) Sentiment Analysis
 if should_run_stage "Sentiment Analysis" "$SENTIMENT_INTERVAL_MINUTES" "$LAST_RUN_SENTIMENT_FILE"; then
     log_message ">>> (2/3) Interval met for Sentiment Analysis. Checking prerequisites..."
-    echo ">>> (2/3) Checking prerequisites for Sentiment Analysis..." # VERBOSE
+    echo ">>> (2/3) Checking prerequisites for Sentiment Analysis..."
     if [ -f "$BASE_DIR/scrape/news.csv" ]; then
         log_message "Input 'scrape/news.csv' found. Running Sentiment Analysis..."
         echo "Input 'scrape/news.csv' found. Starting Sentiment Analysis script (sentiment/main.py)..."
@@ -296,7 +284,7 @@ fi
 # (3) FinRL
 if should_run_stage "FinRL" "$FINRL_INTERVAL_MINUTES" "$LAST_RUN_FINRL_FILE"; then
     log_message ">>> (3/3) Interval met for FinRL. Checking prerequisites..."
-    echo ">>> (3/3) Checking prerequisites for FinRL..." # VERBOSE
+    echo ">>> (3/3) Checking prerequisites for FinRL..."
     if [ -f "$BASE_DIR/sentiment/aggregated_risk_scores.csv" ]; then
         log_message "Input 'sentiment/aggregated_risk_scores.csv' found. Running FinRL..."
         echo "Input 'sentiment/aggregated_risk_scores.csv' found. Starting FinRL script (finrl/main.py)..."
@@ -327,9 +315,9 @@ fi
 
 # --- Deactivate Conda Environment ---
 log_message ">>> Deactivating Conda environment..."
-echo "--- Deactivating Conda environment '$CONDA_DEFAULT_ENV' ---" # VERBOSE
+echo "--- Deactivating Conda environment '$CONDA_DEFAULT_ENV' ---" 
 conda deactivate
 
 log_message "--- Pipeline execution check finished ---"
-echo "--- Pipeline execution check finished ---" # VERBOSE
+echo "--- Pipeline execution check finished ---" 
 exit 0
