@@ -12,7 +12,7 @@ TIMESTAMP_DIR="$BASE_DIR/.run_timestamps" # Directory to store last run times
 GIT_BRANCH="ander_branch" # Set the branch name you want to pull from and push to
 LOG_FILE="$BASE_DIR/pipeline_run.log" # Log file in the project directory
 
-export CUDA_VISIBLE_DEVICES="3" %% # Set the GPU device to use (if applicable)
+export CUDA_VISIBLE_DEVICES="3" # Set the GPU device to use (if applicable)
 
 # --- Schedule Control Variables (Intervals in Minutes) ---
 SCRAPE_INTERVAL_MINUTES=1    # Approx 13 hours
