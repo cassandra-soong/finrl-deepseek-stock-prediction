@@ -164,32 +164,74 @@ log_message "Conda environment '$CONDA_ENV_NAME' activated."
 
 # --- Git Pull ---
 log_message "Attempting Git pull from origin '$GIT_BRANCH'..."
+echo "--- Attempting Git pull from origin '$GIT_BRANCH' ---" # VERBOSE
+
+# Temporarily move pipeline_run.log if it exists
+LOG_FILE_TEMP_NAME=""
+ORIGINAL_LOG_EXISTS=false
+if [ -f "$LOG_FILE" ]; then
+    ORIGINAL_LOG_EXISTS=true
+    LOG_FILE_TEMP_NAME="${LOG_FILE}.temp_pull_$(date +%s)_$$" # Added PID for more uniqueness
+    # Logging this message to the log file before it's moved.
+    log_message "Temporarily moving current $LOG_FILE to $LOG_FILE_TEMP_NAME during git pull operations."
+    echo "Git: Temporarily moving $LOG_FILE to $LOG_FILE_TEMP_NAME" # VERBOSE
+    mv "$LOG_FILE" "$LOG_FILE_TEMP_NAME"
+fi
+
 ( # Use subshell for git operations
-    set -e
+    set -e # Exit subshell on error
     cd "$BASE_DIR" # Ensure we are in the correct directory
-    log_message "Stashing local changes (if any)..."
+
+    log_message "Stashing local changes (if any)... (pipeline_run.log is temporarily moved)" # Log will go to new/empty log if created by pull
+    echo "Git: Stashing local changes (if any)... (pipeline_run.log is out of the way)" # VERBOSE
+    # Now that pipeline_run.log is moved, --include-untracked is safer for other potential untracked files.
     git stash push --keep-index --include-untracked -m "Auto-stash before pull by pipeline_run.sh"
-    log_message "Pulling from origin '$GIT_BRANCH' with rebase..."
+    
+    log_message "Pulling from origin '$GIT_BRANCH' with rebase..." # Log will go to new/empty log
+    echo "Git: Pulling from origin '$GIT_BRANCH' with rebase..." # VERBOSE
     git pull origin "$GIT_BRANCH" --rebase
-    log_message "Attempting to pop stashed changes..."
-    # Try to pop the stash. If it fails (e.g., no stash, or conflict), log it.
+    
+    log_message "Attempting to pop stashed changes..." # Log will go to new/empty log
+    echo "Git: Attempting to pop stashed changes..." # VERBOSE
     if ! git stash pop; then
-        log_message "INFO: No stash to pop, or stash pop resulted in conflicts that need manual resolution, or stash pop failed for other reasons."
-        # If stash pop fails with conflicts, 'git stash drop' might be wanted after manual resolution,
-        # or 'git merge --abort' if the pop started a merge.
-        # For a fully automated script, this situation might require more sophisticated handling
-        # or a policy (e.g., abort the script, notify someone).
-        # For now, we just log it.
+        log_message "INFO: No stash to pop, or stash pop resulted in conflicts that need manual resolution, or stash pop failed for other reasons. Check git status." # Log will go to new/empty log
+        echo "Git INFO: No stash to pop, or pop failed (may require manual conflict resolution). Check git status." # VERBOSE
     else
-        log_message "Stash popped successfully."
+        log_message "Stash popped successfully." # Log will go to new/empty log
+        echo "Git: Stash popped successfully." # VERBOSE
     fi
-    log_message "Git pull sequence completed."
+    log_message "Git pull sequence completed in subshell." # Log will go to new/empty log
 ) || {
+    # This log message might go to a new log file if the subshell created one, or it won't be logged if LOG_FILE doesn't exist yet.
     log_message "ERROR: Git pull sequence failed. Check for conflicts or other issues. Continuing with current local state."
-    # Depending on policy, you might want to exit here if pull fails critically.
-    # For now, it logs and continues.
+    echo "ERROR: Git pull sequence failed. Check current logs and git status. Continuing with current local state." >&2 # VERBOSE
 }
 
+# Restore pipeline_run.log
+if [ "$ORIGINAL_LOG_EXISTS" = true ]; then # Only attempt restoration if it originally existed
+    if [ -f "$LOG_FILE_TEMP_NAME" ]; then
+        echo "Git: Restoring $LOG_FILE from $LOG_FILE_TEMP_NAME" # VERBOSE
+        # If $LOG_FILE was recreated by the pull (e.g., if it was briefly untracked but committed on another branch by mistake)
+        # and now exists, we append the temp log's content to it, then remove temp.
+        # Otherwise, just move temp back.
+        if [ -f "$LOG_FILE" ]; then
+            echo "Git: $LOG_FILE exists, appending content from $LOG_FILE_TEMP_NAME." # VERBOSE
+            cat "$LOG_FILE_TEMP_NAME" >> "$LOG_FILE"
+            rm "$LOG_FILE_TEMP_NAME"
+        else
+            mv "$LOG_FILE_TEMP_NAME" "$LOG_FILE"
+        fi
+        log_message "Restored $LOG_FILE from temporary file. Git operations finished." # This goes to the restored/appended log
+    else
+        # This case should be rare if ORIGINAL_LOG_EXISTS was true.
+        # The log_message here will create a new LOG_FILE if it doesn't exist.
+        log_message "INFO: Temporary log file $LOG_FILE_TEMP_NAME was not found for restoration, though original log existed. A new log file may have been created by git pull if it was tracked."
+        echo "Git INFO: Temporary log file $LOG_FILE_TEMP_NAME not found for restoration." # VERBOSE
+    fi
+else
+    log_message "Git operations finished. No pre-existing log file was moved." # Creates new log if it doesn't exist
+fi
+echo "--- Git pull sequence and log restoration finished. ---" # VERBOSE
 
 # --- Execute Stages Based on Interval Checks ---
 
