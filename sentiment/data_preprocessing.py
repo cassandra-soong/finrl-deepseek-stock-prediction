@@ -56,7 +56,7 @@ def data_preprocessing(path):
         df = df.sort_values("datetime").reset_index(drop=True)
 
         # ──────────────────────── 5. FILTER “YESTERDAY” ──────────────────────
-        start_date = (datetime.now() - timedelta(days=1)).date()   # 00:00 yesterday
+        start_date = (datetime.now() - timedelta(days=30)).date()   # 00:00 yesterday
         end_date   =  datetime.now().date()                        # 00:00 today
 
         df_subset = df[(df["datetime"].dt.date >= start_date) &
