@@ -13,6 +13,15 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse
 import re
 import tldextract
+import logging
+
+logging.basicConfig(
+    filename='../../main_bash.log',
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
+
+logging.info("Scraping started.")
 
 # --------------------------------------------------------------------------------------
 REDDIT_CONFIG = {

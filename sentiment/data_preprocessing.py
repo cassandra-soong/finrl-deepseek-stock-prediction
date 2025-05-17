@@ -2,9 +2,15 @@ from datetime import datetime, timedelta
 import json
 import pandas as pd
 import re
-from config import TEMP_PROCESSED_JSON
+from config import TEMP_PROCESSED_JSON, LOG_FILE
 import sys
+import logging
 
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 
 def data_preprocessing(path):
     """

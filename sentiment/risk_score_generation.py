@@ -1,14 +1,20 @@
 import pandas as pd
 import re
 from tqdm import tqdm
-from config import G_LLM, TEMP_DATE_RISK_CSV
+from config import G_LLM, TEMP_DATE_RISK_CSV, LOG_FILE
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import transformers
 import sys
+import logging
 
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 
 tokenizer = AutoTokenizer.from_pretrained(G_LLM)
-model = AutoModelForCausalLM.from_pretrained(G_LLM)
+model = AutoModelForCausalLM.from_pretrained(G_LLM).to("cuda")
 
 risk_scores = []
 
@@ -67,6 +73,7 @@ def get_risk_score(source, header, content):
             "text-generation",
             model=model,
             tokenizer=tokenizer,
+            device=0,
             temperature=0.1,
             do_sample=True,
             top_k=10,

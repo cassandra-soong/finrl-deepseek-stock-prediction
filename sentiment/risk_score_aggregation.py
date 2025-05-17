@@ -1,7 +1,14 @@
 import pandas as pd
-from config import SOURCE_WEIGHTS, AGGREGATED_WEIGHTS_CSV
+from config import SOURCE_WEIGHTS, AGGREGATED_WEIGHTS_CSV, LOG_FILE
 from datetime import datetime, timedelta
 from tqdm import tqdm
+import logging
+
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 
 
 def _floor_time_half_hour(date):

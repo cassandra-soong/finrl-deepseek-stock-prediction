@@ -1,8 +1,17 @@
 from processing import process
 from training import train
 from inference import get_inference
+from config import LOG_FILE
 import sys
+import logging
 
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
+
+logging.info("FinRL started.")
 
 if __name__ == "__main__":
     try:
