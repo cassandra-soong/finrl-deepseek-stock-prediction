@@ -11,7 +11,7 @@ API_KEYS_FILE="$BASE_DIR/../API_Keys.txt"  # Path to the keys file relative to B
 
 # Git Configuration
 GIT_BRANCH="main_bash" # Set the branch name you want to pull from and push to
-LOG_FILE="$BASE_DIR/../pipeline_run.log" # Log file in the project directory
+LOG_FILE="$BASE_DIR/../main_bash.log" # Log file in the project directory
 
 export CUDA_VISIBLE_DEVICES="0" # Set the GPU device to use (if applicable)
 
