@@ -1,5 +1,11 @@
+requests
+feedparser
+pandas
+beautifulsoup4
+newsapi-python
+praw
+tldextract
 numpy
-pandas 
 transformers
 torch
 swig
