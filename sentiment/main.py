@@ -34,5 +34,5 @@ if __name__ == "__main__":
         
 
     except Exception as e:
-        print(f"Error occured in main.py -> {e}")
+        logging.info(f"Error occured in main.py -> {e}")
         sys.exit(1)

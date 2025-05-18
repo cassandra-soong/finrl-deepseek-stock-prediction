@@ -53,8 +53,8 @@ def data_preprocessing(path):
         start_date = (datetime.now() - timedelta(days=1)).date()
         end_date = datetime.now().date()
         
-        print(f'Start date: {start_date}')
-        print(f'End date: {end_date}')
+        logging.info(f'Start date: {start_date}')
+        logging.info(f'End date: {end_date}')
 
         df_subset = df[(df['datetime'].dt.date >= start_date) & (df['datetime'].dt.date < end_date)]
         df_subset.reset_index(drop=True)
@@ -69,8 +69,8 @@ def data_preprocessing(path):
         # Save to JSON file
         with open(TEMP_PROCESSED_JSON, 'w') as f:
             json.dump(data_dicts, f, indent=4, default=str)
-            print('Processed data saved as JSON file')
+            logging.info('Processed data saved as JSON file')
 
     except Exception as e:
-        print(f"[Error in data preprocessing pipeline] -> {e}")
+        logging.info(f"[Error in data preprocessing pipeline] -> {e}")
         sys.exit(1)

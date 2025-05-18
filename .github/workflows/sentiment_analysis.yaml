@@ -1,41 +1,41 @@
-name: Run Sentiment Pipeline
+# name: Run Sentiment Pipeline
 
-on:
-  schedule:
-    - cron: '0 10 * * *'  # Everyday at 10:00 UTC
-  workflow_dispatch:      # Allows manual trigger from GitHub UI
+# on:
+#   schedule:
+#     - cron: '0 10 * * *'  # Everyday at 10:00 UTC
+#   workflow_dispatch:      # Allows manual trigger from GitHub UI
 
-jobs:
-  run-sentiment-pipeline:
-    runs-on: ubuntu-latest
+# jobs:
+#   run-sentiment-pipeline:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.10'
 
-      - name: Install dependencies
-        working-directory: ./sentiment
-        run: |
-          pip install -r requirements.txt
+#       - name: Install dependencies
+#         working-directory: ./sentiment
+#         run: |
+#           pip install -r requirements.txt
 
-      - name: Run main.py
-        working-directory: ./sentiment
-        run: |
-          python main.py
+#       - name: Run main.py
+#         working-directory: ./sentiment
+#         run: |
+#           python main.py
       
-      - name: Commit and push changes
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git pull origin main
-          cd sentiment
-          git add . 
-          git commit -m "Update generated JSON and CSV files from sentiment pipeline"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Commit and push changes
+#         run: |
+#           git config --global user.name 'github-actions[bot]'
+#           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+#           git pull origin main
+#           cd sentiment
+#           git add . 
+#           git commit -m "Update generated JSON and CSV files from sentiment pipeline"
+#           git push
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
