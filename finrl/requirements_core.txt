@@ -7,7 +7,6 @@ praw
 tldextract
 numpy>=1.21.0
 transformers
-torch>=1.9.0
 swig
 wrds
 pyportfolioopt
@@ -21,6 +20,4 @@ mlflow>=1.20.0
 gym>=0.21.0
 finrl>=0.3.5
 tensorboard>=2.6.0
-tqdm>=4.62.0
-
-# ensure python version >= 3.11
+tqdm>=4.62.0 
