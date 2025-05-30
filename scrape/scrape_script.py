@@ -121,7 +121,7 @@ def scrape_reddit():
                     "Source": "Reddit",
                     "Link": f"https://reddit.com{post.permalink}"
                 })
-    print("Reddit done")
+    logging.info("Reddit done")
     return results
 
 def scrape_rss():
@@ -166,7 +166,7 @@ def scrape_rss():
                     "Source": "News",
                     "Link": link
                 })
-    print("RSS Feed done")
+    logging.info("RSS Feed done")
     return results
 
 def scrape_newsapi():
@@ -213,7 +213,7 @@ def scrape_newsapi():
                 "Source": "News",
                 "Link": article['url']
             })
-    print("NewsAPI done")
+    logging.info("NewsAPI done")
     return results
 
 # --------------------------------------------------------------------------------------

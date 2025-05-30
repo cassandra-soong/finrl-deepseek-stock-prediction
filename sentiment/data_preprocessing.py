@@ -71,8 +71,8 @@ def data_preprocessing(path):
         # ───────────────────────── 6. SAVE AS JSON ───────────────────────────
         with open(TEMP_PROCESSED_JSON, "w") as f:
             json.dump(df_subset.to_dict(orient="records"), f, indent=4, default=str)
-            print(f"✅ Processed data saved to {TEMP_PROCESSED_JSON}")
+            logging.info(f"✅ Processed data saved to {TEMP_PROCESSED_JSON}")
 
     except Exception as e:
-        print(f"[Error in data preprocessing pipeline] -> {e}")
+        logging.info(f"[Error in data preprocessing pipeline] -> {e}")
         sys.exit(1)

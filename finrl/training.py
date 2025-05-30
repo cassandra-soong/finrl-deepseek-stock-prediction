@@ -30,7 +30,7 @@ def setup_environment():
         # Environment setup
         stock_dimension = len(train.tic.unique())
         state_space = 1 + 2 * stock_dimension + len(INDICATORS) * stock_dimension
-        print(f"Stock Dimension: {stock_dimension}, State Space: {state_space}")
+        logging.info(f"Stock Dimension: {stock_dimension}, State Space: {state_space}")
 
         buy_cost_list = sell_cost_list = [0.001] * stock_dimension  
         num_stock_shares = [0] * stock_dimension
@@ -54,7 +54,7 @@ def setup_environment():
         return env_train
     
     except Exception as e:
-        print(f"[Error in finrl training.py] -> {e}")
+        logging.info(f"[Error in finrl training.py] -> {e}")
         sys.exit(1)
 
 
@@ -84,7 +84,7 @@ def train_a2c():
         trained_a2c.save(TRAINED_MODEL_DIR + "/agent_a2c")
     
     except Exception as e:
-        print(f"[Error in finrl training.py] -> {e}")
+        logging.info(f"[Error in finrl training.py] -> {e}")
         sys.exit(1)
 
 
@@ -127,5 +127,5 @@ def train_sac():
         trained_sac.save(TRAINED_MODEL_DIR + "/agent_sac")
     
     except Exception as e:
-        print(f"[Error in finrl training.py] -> {e}")
+        logging.info(f"[Error in finrl training.py] -> {e}")
         sys.exit(1)

@@ -85,4 +85,4 @@ def aggregate_risk_score(filename):
     # Convert result into new dataframe and append to aggregated_risk_scores.csv
     result_df = pd.DataFrame(aggregated)
     result_df.to_csv(AGGREGATED_WEIGHTS_CSV , mode='a', header=False, index=False)
-    print(f"Appended aggregated weights to existing CSV: {AGGREGATED_WEIGHTS_CSV }")
+    logging.info(f"Appended aggregated weights to existing CSV: {AGGREGATED_WEIGHTS_CSV }")
