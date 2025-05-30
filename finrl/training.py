@@ -3,9 +3,15 @@ from finrl.meta.env_stock_trading.env_stocktrading import StockTradingEnv
 from finrl.agents.stablebaselines3.models import DRLAgent
 from stable_baselines3.common.logger import configure
 from finrl.config import INDICATORS, TRAINED_MODEL_DIR, RESULTS_DIR
-from config import TRAIN_CSV
+from config import TRAIN_CSV, LOG_FILE
 import sys
+import logging
 
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 
 def setup_environment():
     """

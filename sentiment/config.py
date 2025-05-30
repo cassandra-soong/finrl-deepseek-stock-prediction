@@ -6,6 +6,7 @@ TEMP_PROCESSED_JSON = 'temp/processed_data.json'
 NEWS_WITH_SCORE_CSV = 'news_with_risk_score.csv'
 TEMP_DATE_RISK_CSV = 'temp/date_risk.csv'
 AGGREGATED_WEIGHTS_CSV = 'aggregated_risk_scores.csv'
+LOG_FILE = "../../main_server.log"
 
 # Model
 G_LLM = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"

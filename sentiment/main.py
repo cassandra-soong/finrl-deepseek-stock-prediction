@@ -1,9 +1,18 @@
-from config import RAW_DATA_CSV, TEMP_PROCESSED_JSON, NEWS_WITH_SCORE_CSV, TEMP_DATE_RISK_CSV
+from config import RAW_DATA_CSV, TEMP_PROCESSED_JSON, NEWS_WITH_SCORE_CSV, TEMP_DATE_RISK_CSV, LOG_FILE
 from data_preprocessing import data_preprocessing
 from risk_score_generation import get_all_scores, append_score_to_csv
 from risk_score_aggregation import aggregate_risk_score
 import json
 import sys
+import logging
+
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
+
+logging.info("Sentiment started.")
 
 
 if __name__ == "__main__":

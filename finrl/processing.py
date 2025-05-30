@@ -4,9 +4,15 @@ import itertools
 import datetime
 from finrl.meta.preprocessor.preprocessors import FeatureEngineer, data_split
 from finrl.config import INDICATORS
-from config import TRAIN_CSV, TRADE_CSV
+from config import TRAIN_CSV, TRADE_CSV, LOG_FILE
 import sys
+import logging
 
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 
 def process():
     """

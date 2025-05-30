@@ -1,7 +1,13 @@
 from utils import *
-from config import RESULTS_CSV
+from config import RESULTS_CSV, LOG_FILE
 import sys
+import logging
 
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 
 def get_inference():
     """
