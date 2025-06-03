@@ -12,6 +12,7 @@ NEWS_WITH_SCORE_CSV = 'news_with_risk_score.csv'
 TEMP_DATE_RISK_CSV = 'temp/date_risk.csv'
 AGGREGATED_WEIGHTS_CSV = 'aggregated_risk_scores.csv'
 MODEL_CACHE_DIR = 'cache_models'
+LOG_FILE = "../../main_branch.log"
 
 # Model
 G_LLM = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"

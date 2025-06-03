@@ -4,8 +4,15 @@ import itertools
 import datetime
 from finrl.meta.preprocessor.preprocessors import FeatureEngineer, data_split
 from finrl.config import INDICATORS
-from config import TRAIN_CSV, TRADE_CSV
+from config import TRAIN_CSV, TRADE_CSV, LOG_FILE
 import sys
+import logging
+
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 
 
 def process():
@@ -26,11 +33,11 @@ def process():
         start_date = start_date.strftime("%Y-%m-%d")
         end_date = end_date.strftime("%Y-%m-%d")
 
-        print("Start date: ", start_date)
-        print("End date: ", end_date)
+        logging.info("Start date: ", start_date)
+        logging.info("End date: ", end_date)
 
         # Download NVDA hourly data
-        print(f'Downloading hourly data from yfinance between {start_date} - {end_date}')
+        logging.info(f'Downloading hourly data from yfinance between {start_date} - {end_date}')
         nvda_df_yf = yf.download(
             tickers="NVDA",
             start=start_date,
@@ -93,7 +100,7 @@ def process():
 
         processed_full = processed_full.reset_index(drop=True)
 
-        print(f'processed df shape: {processed_full.shape}')
+        logging.info(f'processed df shape: {processed_full.shape}')
 
         # Split into train/test
         TRAIN_START_DATE = processed_full['date'].min()
@@ -104,20 +111,20 @@ def process():
         train = data_split(processed_full, TRAIN_START_DATE, TRAIN_END_DATE)
         trade = data_split(processed_full, TRADE_START_DATE, TRADE_END_DATE)
 
-        print(f'Train start date: {TRAIN_START_DATE}')
-        print(f'Train end date: {TRAIN_END_DATE}')
-        print(f'Trade start date: {TRADE_START_DATE}')
-        print(f'Trade end date: {TRADE_END_DATE}')
+        logging.info(f'Train start date: {TRAIN_START_DATE}')
+        logging.info(f'Train end date: {TRAIN_END_DATE}')
+        logging.info(f'Trade start date: {TRADE_START_DATE}')
+        logging.info(f'Trade end date: {TRADE_END_DATE}')
 
-        print(f"Train size: {len(train)} rows")
-        print(f"Trade size: {len(trade)} rows")
+        logging.info(f"Train size: {len(train)} rows")
+        logging.info(f"Trade size: {len(trade)} rows")
 
         # Save train and trade csv
         train.to_csv(TRAIN_CSV)
-        print("Saved train_date.csv")
+        logging.info("Saved train_date.csv")
         trade.to_csv(TRADE_CSV)
-        print("Saved trade_date.csv")
+        logging.info("Saved trade_date.csv")
     
     except Exception as e:
-        print(f"[Error in finrl processing.py] -> {e}")
+        logging.info(f"[Error in finrl processing.py] -> {e}")
         sys.exit(1)

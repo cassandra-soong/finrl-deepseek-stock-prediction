@@ -1,14 +1,21 @@
 import pandas as pd
 import re
 from tqdm import tqdm
-from config import G_LLM, TEMP_DATE_RISK_CSV
+from config import G_LLM, TEMP_DATE_RISK_CSV, LOG_FILE
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import transformers
 import sys
+import logging
+
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 
 
 tokenizer = AutoTokenizer.from_pretrained(G_LLM)
-model = AutoModelForCausalLM.from_pretrained(G_LLM)
+model = AutoModelForCausalLM.from_pretrained(G_LLM).to("cuda")
 
 scored_articles = []
 
@@ -67,6 +74,7 @@ def get_risk_score(source, header, content):
             "text-generation",
             model=model,
             tokenizer=tokenizer,
+            device=0,
             temperature=0.1,
             do_sample=True,
             top_k=10,
@@ -85,15 +93,15 @@ def get_risk_score(source, header, content):
         if match:
             score = int(match.group(1))
             # risk_scores.append(score)
-            print(f"Extracted risk score: {score}")
+            logging.info(f"Extracted risk score: {score}")
             return score
         else:
-            print("⚠️ Could not extract risk score from response:", response)
+            logging.info("⚠️ Could not extract risk score from response:", response)
             # risk_scores.append(3)
             return 3
 
     except Exception as e:
-        print(f"[Error in risk score generation] -> {e}")
+        logging.info(f"[Error in risk score generation] -> {e}")
         sys.exit(1)
 
 
@@ -107,7 +115,7 @@ def get_all_scores(json_data):
         risk_score (list): A list of generated risk score for each news extracted.
     """
     for i in tqdm(range(len(json_data)), desc="Generating risk scores"):
-        print(f"Data entry number {i}:\n")
+        logging.info(f"Data entry number {i}:\n")
         datetime = json_data[i]['datetime']
         source = json_data[i]['source']
         header = json_data[i]['header']
@@ -124,8 +132,8 @@ def get_all_scores(json_data):
             }
         )
     
-    # print(f'\nAll risk scores: {risk_scores}')
-    print("Risk score generation completed.")
+    # logging.info(f'\nAll risk scores: {risk_scores}')
+    logging.info("Risk score generation completed.")
     
     return scored_articles
 
@@ -163,12 +171,12 @@ def append_score_to_csv(json_data, risk_scores, filename):
             
             # Append new data with risk score to existing news_with_risk_score.csv
             temp_df.to_csv(filename, mode='a', header=False, index=False)
-            print(f"Appended to existing CSV: {filename}")
+            logging.info(f"Appended to existing CSV: {filename}")
             
             # Save only datetime, source, specific source, and risk columns to temp/date_risk.csv for aggregation step.
             save_tmp_csv(temp_df)
-            print(f'Saved datetime and risk result to date_risk.csv')
+            logging.info(f'Saved datetime and risk result to date_risk.csv')
             
     except Exception as e:
-        print(f"[Error in risk score generation] -> {e}")
+        logging.info(f"[Error in risk score generation] -> {e}")
         sys.exit(1)

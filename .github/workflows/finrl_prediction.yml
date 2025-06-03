@@ -1,41 +1,44 @@
-name: Run FinRL pipeline
+## Github Action Paused
+## Running automation in server
 
-on:
-  schedule:
-    - cron: '0 10 * * 4'   # Every Thursday at 10:00 UTC
-  workflow_dispatch:       # Allows manual trigger from GitHub UI
+# name: Run FinRL pipeline
 
-jobs:
-  run-finrl-prediction:
-    runs-on: ubuntu-latest
+# on:
+#   schedule:
+#     - cron: '0 10 * * 4'   # Every Thursday at 10:00 UTC
+#   workflow_dispatch:       # Allows manual trigger from GitHub UI
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+# jobs:
+#   run-finrl-prediction:
+#     runs-on: ubuntu-latest
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        working-directory: ./finrl
-        run: |
-          pip install -r requirements.txt
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.12'
 
-      - name: Run main.py
-        working-directory: ./finrl
-        run: |
-          python main.py
+#       - name: Install dependencies
+#         working-directory: ./finrl
+#         run: |
+#           pip install -r requirements.txt
+
+#       - name: Run main.py
+#         working-directory: ./finrl
+#         run: |
+#           python main.py
       
-      - name: Commit and push changes
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git pull origin main
-          cd finrl
-          git add . 
-          git commit -m "Update generated CSV files from finrl pipeline"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Commit and push changes
+#         run: |
+#           git config --global user.name 'github-actions[bot]'
+#           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+#           git pull origin main
+#           cd finrl
+#           git add . 
+#           git commit -m "Update generated CSV files from finrl pipeline"
+#           git push
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

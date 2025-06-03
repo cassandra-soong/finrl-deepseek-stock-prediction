@@ -1,7 +1,14 @@
 import pandas as pd
-from config import SOURCE_WEIGHTS, AGGREGATED_WEIGHTS_CSV
+from config import SOURCE_WEIGHTS, AGGREGATED_WEIGHTS_CSV, LOG_FILE
 from datetime import datetime, timedelta
 from tqdm import tqdm
+import logging
+
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
 
 
 def _floor_time_half_hour(date):
@@ -78,4 +85,4 @@ def aggregate_risk_score(filename):
     # Convert result into new dataframe and append to aggregated_risk_scores.csv
     result_df = pd.DataFrame(aggregated)
     result_df.to_csv(AGGREGATED_WEIGHTS_CSV , mode='a', header=False, index=False)
-    print(f"Appended aggregated weights to existing CSV: {AGGREGATED_WEIGHTS_CSV }")
+    logging.info(f"Appended aggregated weights to existing CSV: {AGGREGATED_WEIGHTS_CSV }")

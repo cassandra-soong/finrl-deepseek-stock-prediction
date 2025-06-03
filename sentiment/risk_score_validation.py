@@ -1,10 +1,18 @@
 # sentiment_validation.py
 from huggingface_hub import login
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-from config import VALIDATION_LLM, HF_TOKEN, device, MODEL_CACHE_DIR
+from config import VALIDATION_LLM, HF_TOKEN, device, MODEL_CACHE_DIR, LOG_FILE
 from risk_score_generation import get_risk_score
 import torch
 import re
+import logging
+
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s'
+)
+
 
 def validation_pipeline_setup():
     """
@@ -42,10 +50,10 @@ def validation_pipeline_setup():
             pad_token_id=tokenizer.eos_token_id # Set pad_token_id
         )
 
-        print("Validation pipeline loaded successfully.")
+        logging.info("Validation pipeline loaded successfully.")
         return validation_pipeline
     except Exception as e:
-        print(f"Error in validation pipeline loading: {e}")
+        logging.info(f"Error in validation pipeline loading: {e}")
         return None
 
 def validate_risk_score(val_pipeline, header, content, assigned_score):
@@ -65,7 +73,7 @@ def validate_risk_score(val_pipeline, header, content, assigned_score):
                explanation contains the LLM's reasoning.
     """
     if val_pipeline is None:
-        print("Validation pipeline not loaded.")
+        logging.info("Validation pipeline not loaded.")
         val_pipeline = validation_pipeline_setup()
         if val_pipeline is None:
             raise ValueError("Validation pipeline setup failed.")
@@ -94,7 +102,7 @@ def validate_risk_score(val_pipeline, header, content, assigned_score):
         Validation Result:"""
 
         response_text = val_pipeline(prompt_instruction)[0]['generated_text'].strip()
-        print(f"\nRaw Validation Response for score {assigned_score} ('{header}'):\n'{response_text}'")
+        logging.info(f"\nRaw Validation Response for score {assigned_score} ('{header}'):\n'{response_text}'")
 
         # Regex to capture VALID/INVALID and the explanation
         match = re.match(r"(VALID|INVALID)\s*[:.-]*\s*(.*)", response_text, re.IGNORECASE)
@@ -126,7 +134,7 @@ def validate_risk_score(val_pipeline, header, content, assigned_score):
                 return False, "Could not parse validation status from response. Raw: " + response_text
 
     except Exception as e:
-        print(f"[Error in risk score validation] -> {e}")
+        logging.info(f"[Error in risk score validation] -> {e}")
         return False, f"Exception during validation: {e}"
 
 def validate_all_scores(scored_articles):
@@ -138,8 +146,8 @@ def validate_all_scores(scored_articles):
     validation_ppl = validation_pipeline_setup()
 
     if validation_ppl:
-        print("\n--- Starting Sentiment Validation Task ---")
-        print("------------------------------------")
+        logging.info("\n--- Starting Sentiment Validation Task ---")
+        logging.info("------------------------------------")
         for i, scored_article in enumerate(scored_articles):
             risk_score = scored_article["risk_score"]
             if risk_score:
@@ -150,40 +158,40 @@ def validate_all_scores(scored_articles):
                     risk_score
                 )
 
-                print(f"\nValidating Article {i+1}: '{scored_article['header']}'")
-                print(f"Assigned Score: {risk_score}")
-                print(f"\nValidation Status: {'VALID' if is_valid else 'INVALID'}")
-                print(f"Explanation: {explanation}")
-                print("------------------------------------\n")
+                logging.info(f"\nValidating Article {i+1}: '{scored_article['header']}'")
+                logging.info(f"Assigned Score: {risk_score}")
+                logging.info(f"\nValidation Status: {'VALID' if is_valid else 'INVALID'}")
+                logging.info(f"Explanation: {explanation}")
+                logging.info("------------------------------------\n")
 
                 scored_articles[i].update({
                     "is_valid": is_valid,
                     "explanation": explanation
                 })
             else:
-                print(f"⚠️ No risk score found for this article. Skipping validation for Article {i+1}: {scored_article['header']}")
+                logging.info(f"⚠️ No risk score found for this article. Skipping validation for Article {i+1}: {scored_article['header']}")
                 continue
             
         return scored_articles
     else:
-        print("Could not start validation task as the pipeline failed to load.")
+        logging.info("Could not start validation task as the pipeline failed to load.")
 
 def regeneration(validated_articles):
-    print("\n--- Starting Re-generation check ---")
-    print("------------------------------------")
+    logging.info("\n--- Starting Re-generation check ---")
+    logging.info("------------------------------------")
     for i, validated_article in enumerate(validated_articles):
         if not validated_article["is_valid"]:
-            print(f"\nRe-generating risk score for invalidated Article {i+1}: {validated_article['header']}")
+            logging.info(f"\nRe-generating risk score for invalidated Article {i+1}: {validated_article['header']}")
             regenerated_score = get_risk_score(validated_article["source"], validated_article["header"], validated_article["content"])
-            print(f"\nRegenerated Score: {regenerated_score}")
+            logging.info(f"\nRegenerated Score: {regenerated_score}")
             validated_articles[i]["risk_score"] = regenerated_score
             validated_articles[i]["is_valid"] = "Re-generated / No re-validation performed."
             validated_articles[i]["explanation"] += "\nSCORE REGENERATED DUE TO INVALIDATION"
-            print("------------------------------------")
+            logging.info("------------------------------------")
 
         else:
-            print(f"No need to regenerate for Validated Article {i+1}: {validated_article['header']}")
-            print("------------------------------------")
+            logging.info(f"No need to regenerate for Validated Article {i+1}: {validated_article['header']}")
+            logging.info("------------------------------------")
             continue
 
     return validated_articles
