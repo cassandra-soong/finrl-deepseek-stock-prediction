@@ -149,7 +149,7 @@ def scrape_rss():
             timestamp = pub_dt.strftime('%Y-%m-%d %H:%M:%S')
 
             class_map = {
-                'yahoo.com': ['body yf-3qln1o'],
+                'yahoo.com': ['body yf-1ir6o1g'],
                 'fool.com': ['article-body'],
                 'investopedia.com': [
                     'comp article-body mntl-block',
