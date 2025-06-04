@@ -1,0 +1,4 @@
+sentiment/__pycache__/
+sentiment/cache_models/
+sentiment/temp/
+finrl/__pycache__
