@@ -179,7 +179,7 @@ def scrape_newsapi():
             soup = BeautifulSoup(r.content, 'html.parser')
             possible_classes = [
                 'b6Cr_ article-body-container', 'entry', 'Story_body__ZYOg0 userContent',
-                'zox-post-body-wrap', 'sp_txt', 'article-body'
+                'zox-post-body-wrap', 'sp_txt', 'article-body', 'm-detail--body'
             ]
             for class_name in possible_classes:
                 article = soup.find('div', class_=class_name)
