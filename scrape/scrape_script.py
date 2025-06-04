@@ -149,10 +149,13 @@ def scrape_rss():
             timestamp = pub_dt.strftime('%Y-%m-%d %H:%M:%S')
 
             class_map = {
-                'yahoo.com': 'body yf-1ir6o1g',
-                'fool.com': 'article-body',
-                'investopedia.com': 'comp article-body mntl-block',
-                'nasdaq.com': 'jupiter22-c-article-body',
+                'yahoo.com': ['body yf-3qln1o'],
+                'fool.com': ['article-body'],
+                'investopedia.com': [
+                    'comp article-body mntl-block',
+                    'comp mntl-sc-page mntl-block article-body-content'
+                ],
+                'nasdaq.com': ['jupiter22-c-article-body'],
             }
             target_class = next((v for k, v in class_map.items() if k in link), 'article-body')
 
