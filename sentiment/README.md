@@ -50,9 +50,14 @@ There are 5 python scripts in this directory. The purpose of each script is as f
  - More information can be found in the jupyter notebook for KMeans in `kmeans_for_weights.ipynb`
 
 
-### ➤ ⚙️ **Automated Execution with GitHub Actions**  
- - Runs every Tuesday - Saturday at 10:00 (UTC).
+### ➤ ⚙️ **Automated Execution with bash script**  
+ - Runs every every Tuesday - Saturday at 10:00 AM.
+ - Setup of automated run time in `crontab -e`.
+
+Previously automated on **Github Actions**.
+
 ---
+
 
 ### 🚀 How to run the script manually
 First, make sure you are in the right directory:
@@ -71,4 +76,10 @@ To run the main script, run the following command:
 
 ```bash
 python main.py
+```
+
+To run the sentiment part in the automated bash script in the event of manual run or rerun from failed executions, run the following command:
+
+```bash
+bash start_script.sh sentiment
 ```
