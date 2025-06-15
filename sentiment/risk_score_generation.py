@@ -17,7 +17,8 @@ logging.basicConfig(
 tokenizer = AutoTokenizer.from_pretrained(G_LLM)
 model = AutoModelForCausalLM.from_pretrained(G_LLM).to("cuda")
 
-scored_articles = []
+# scored_articles = []
+risk_scores = []
 
 def get_risk_score(source, header, content):
     """
@@ -92,13 +93,13 @@ def get_risk_score(source, header, content):
 
         if match:
             score = int(match.group(1))
-            # risk_scores.append(score)
+            risk_scores.append(score)
             logging.info(f"Extracted risk score: {score}")
-            return score
+            # return score
         else:
             logging.info("⚠️ Could not extract risk score from response:", response)
-            # risk_scores.append(3)
-            return 3
+            risk_scores.append(3)
+            # return 3
 
     except Exception as e:
         logging.info(f"[Error in risk score generation] -> {e}")
@@ -116,26 +117,29 @@ def get_all_scores(json_data):
     """
     for i in tqdm(range(len(json_data)), desc="Generating risk scores"):
         logging.info(f"Data entry number {i}:\n")
-        datetime = json_data[i]['datetime']
+        # datetime = json_data[i]['datetime']
         source = json_data[i]['source']
         header = json_data[i]['header']
         content = json_data[i]['content']
 
-        risk_score = get_risk_score(source, header, content)
-        scored_articles.append(
-            {
-            "datetime": datetime,
-            "source": source,
-            "header": header,
-            "content": content,
-            "risk_score": risk_score
-            }
-        )
+        get_risk_score(source, header, content)
+
+        # risk_score = get_risk_score(source, header, content)
+        # scored_articles.append(
+        #     {
+        #     "datetime": datetime,
+        #     "source": source,
+        #     "header": header,
+        #     "content": content,
+        #     "risk_score": risk_score
+        #     }
+        # )
     
-    # logging.info(f'\nAll risk scores: {risk_scores}')
+    logging.info(f'\nAll risk scores: {risk_scores}')
     logging.info("Risk score generation completed.")
     
-    return scored_articles
+    # return scored_articles
+    return risk_scores
 
 
 def save_tmp_csv(temp_df):

@@ -28,19 +28,20 @@ if __name__ == "__main__":
         logging.info("\n--- Processed JSON Data loaded successfully ---\n")
         
         # Generate risk score for each news
-        scored_articles = get_all_scores(json_data)
+        # scored_articles = get_all_scores(json_data)
+        risk_scores = get_all_scores(json_data)
         logging.info("\n--- Risk Score Generation Completed ---\n")
 
         # Validate risk scores
-        validated_articles = validate_all_scores(scored_articles)
-        logging.info("\n--- Validation Completed ---\n")
+        # validated_articles = validate_all_scores(scored_articles)
+        # logging.info("\n--- Validation Completed ---\n")
 
-        # Regeneration
-        regenerated_articles = regeneration(validated_articles)
-        logging.info("\n--- Regeneration Completed ---\n")
+        # # Regeneration
+        # regenerated_articles = regeneration(validated_articles)
+        # logging.info("\n--- Regeneration Completed ---\n")
 
         # Extract risk scores from all articles
-        risk_scores = [article['risk_score'] for article in regenerated_articles]
+        # risk_scores = [article['risk_score'] for article in regenerated_articles]
         
         # Append new data with risk score for tracing purposes
         append_score_to_csv(json_data, risk_scores, NEWS_WITH_SCORE_CSV)
