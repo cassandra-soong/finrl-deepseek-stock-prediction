@@ -2,7 +2,7 @@ from config import RAW_DATA_CSV, TEMP_PROCESSED_JSON, NEWS_WITH_SCORE_CSV, TEMP_
 from data_preprocessing import data_preprocessing
 from risk_score_generation import get_all_scores, append_score_to_csv
 from risk_score_aggregation import aggregate_risk_score
-from risk_score_validation import validate_all_scores, regeneration
+# from risk_score_validation import validate_all_scores, regeneration
 import json
 import sys
 import logging
@@ -27,12 +27,12 @@ if __name__ == "__main__":
             json_data = json.load(f)
         logging.info("\n--- Processed JSON Data loaded successfully ---\n")
         
-        # Generate risk score for each news
+        # # Generate risk score for each news
         # scored_articles = get_all_scores(json_data)
         risk_scores = get_all_scores(json_data)
         logging.info("\n--- Risk Score Generation Completed ---\n")
 
-        # Validate risk scores
+        # # Validate risk scores
         # validated_articles = validate_all_scores(scored_articles)
         # logging.info("\n--- Validation Completed ---\n")
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         # regenerated_articles = regeneration(validated_articles)
         # logging.info("\n--- Regeneration Completed ---\n")
 
-        # Extract risk scores from all articles
+        # # Extract risk scores from all articles
         # risk_scores = [article['risk_score'] for article in regenerated_articles]
         
         # Append new data with risk score for tracing purposes
@@ -50,6 +50,7 @@ if __name__ == "__main__":
         # Aggregate risk score
         aggregate_risk_score(TEMP_DATE_RISK_CSV)
         logging.info("\n--- Aggregating risk score Completed ---\n")
+        
     except Exception as e:
         logging.info(f"Error occured in main.py -> {e}")
         sys.exit(1)
