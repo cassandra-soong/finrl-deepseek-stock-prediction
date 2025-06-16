@@ -13,8 +13,11 @@ Optimization results are saved in CSV and JSON formats for traceability and depl
 ## 📁 Project Structure
 
 HyperParamaterOptimization/
+
 ├── optimizer.py               # Full Optuna-based optimization script (PPO, A2C, SAC, TD3)
+
 ├── *_trials_log.csv         # Trial logs (auto-generated)
+
 ├── best_hyperparams_*.json    # Best hyperparameter sets for each algorithm (auto-generated)
 
 Make sure your environment includes:
