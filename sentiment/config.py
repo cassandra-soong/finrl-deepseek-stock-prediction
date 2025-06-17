@@ -15,33 +15,37 @@ MODEL_CACHE_DIR = 'cache_models'
 LOG_FILE = "../../main_branch.log"
 
 # Model
-G_LLM = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+G_LLM = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
 VALIDATION_LLM = "meta-llama/Llama-3.2-3B-Instruct"
 
 # Specific source weights
 SOURCE_WEIGHTS = {
-                  "investing": 0.0360, 
-                  "StockMarket": 0.0647, 
-                  "stocks": 0.0297,
-                  "wallstreetbets": 0.0609, 
-                  "Etfdailynews": 0.0445, 
-                  "Ndtv": 0.0411,
-                  "Forbes": 0.0411, 
-                  "Globenewswire": 0.0322, 
-                  "Nbcnews": 0.0402,
-                  "Investopedia": 0.0492, 
-                  "Bostonherald": 0.0587, 
-                  "Yahoo Finance": 0.0411,
-                  "Coindesk": 0.0405, 
-                  "Foxbusiness": 0.0411, 
-                  "Telegraph": 0.0645,
-                  "Fool": 0.0322, 
-                  "Techcrunch": 0.0617, 
-                  "Cnn": 0.0514, 
-                  "Thestreet": 0.0411,
-                  "Verdict": 0.0480, 
-                  "Denverpost": 0.0386, 
-                  "Marketwatch": 0.0411
+                  "investing": 0.0338, 
+                  "StockMarket": 0.0338, 
+                  "stocks": 0.0410,
+                  "wallstreetbets": 0.0600, 
+                  "Etfdailynews": 0.0338, 
+                  "Ndtv": 0.0338,
+                  "Forbes": 0.0338, 
+                  "Globenewswire": 0.0456, 
+                  "Nbcnews": 0.0338,
+                  "Investopedia": 0.0338, 
+                  "Bostonherald": 0.0338, 
+                  "Yahoo Finance": 0.0338,
+                  "Coindesk": 0.0338, 
+                  "Foxbusiness": 0.0338, 
+                  "Telegraph": 0.0391,
+                  "Fool": 0.0338, 
+                  "Techcrunch": 0.0338, 
+                  "Cnn": 0.0338, 
+                  "Thestreet": 0.0338,
+                  "Verdict": 0.0367, 
+                  "Denverpost": 0.0338, 
+                  "Marketwatch": 0.0347,
+                  "Medicaldevice-network": 0.0338,
+                  "Just-auto": 0.1002,
+                  "Investmentmonitor": 0.0338,
+                  "Retailbankerinternational": 0.0338
                 }
 
 # Device
