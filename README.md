@@ -33,7 +33,8 @@ Example:
 ![dashboard example](dashboard_image.png)
 <br>
 
+### Setting up the automation
+See [How-To Steps](documentation/how_to.md) for detailed instructions on how to set up the automation.
+
 ### Disclaimer
 This project is done as part of the studies in BSc. Computer Science and AI at Technische Hochschule Ingolstadt. This project uses libraries and models from FinRL and DeepSeek. All rights, ownership, and intellectual property related to these tools belong to their respective creators and organizations. This repository is for educational purposes only and does not claim ownership or authorship of the original models or libraries.
-
-
